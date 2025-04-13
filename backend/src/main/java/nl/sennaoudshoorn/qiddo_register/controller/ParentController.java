@@ -2,14 +2,8 @@ package nl.sennaoudshoorn.qiddo_register.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import nl.sennaoudshoorn.qiddo_register.model.Parent;
 import nl.sennaoudshoorn.qiddo_register.service.ParentService;
@@ -25,27 +19,34 @@ public class ParentController {
     }
 
     @GetMapping
-    public List<Parent> getAllParents() {
-        return parentService.findAll();
+    public ResponseEntity<List<Parent>> getAllParents() {
+        return ResponseEntity.ok(parentService.findAll());
     }
 
     @GetMapping("/{id}")
-    public Parent getParentById(@PathVariable Long id) {
-        return parentService.findById(id);
+    public ResponseEntity<Parent> getParentById(@PathVariable Long id) {
+        Parent parent = parentService.findById(id);
+        return parent != null ? ResponseEntity.ok(parent) : ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public Parent createParent(@RequestBody Parent parent) {
-        return parentService.save(parent);
+    public ResponseEntity<Parent> createParent(@RequestBody Parent parent) {
+        // Ensure gender is set
+        if (parent.getGender() == null) {
+            parent.setGender("Onbekend");
+        }
+        return ResponseEntity.ok(parentService.save(parent));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteParent(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteParent(@PathVariable Long id) {
         parentService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
-    public Parent updateParent(@PathVariable Long id, @RequestBody Parent updatedParent) {
-      return parentService.updateParent(id, updatedParent);
+    public ResponseEntity<Parent> updateParent(@PathVariable Long id, @RequestBody Parent updatedParent) {
+        Parent parent = parentService.updateParent(id, updatedParent);
+        return parent != null ? ResponseEntity.ok(parent) : ResponseEntity.notFound().build();
     }
 }

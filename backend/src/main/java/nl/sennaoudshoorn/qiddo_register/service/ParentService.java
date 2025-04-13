@@ -1,6 +1,7 @@
 package nl.sennaoudshoorn.qiddo_register.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,10 @@ public class ParentService {
 
     public List<Parent> findAll() {
         return parentRepository.findAll();
+    }
+
+    public Optional<Parent> getParentById(Long id) {
+        return parentRepository.findById(id);
     }
 
     public Parent findById(Long id) {

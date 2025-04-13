@@ -6,7 +6,7 @@ import { Menu } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Baby, Home, Users } from "lucide-react"
+import { Baby, Home, Users, Calendar, Receipt } from "lucide-react"
 
 export default function Header() {
   const pathname = usePathname()
@@ -30,6 +30,18 @@ export default function Header() {
       href: "/parents",
       active: pathname.includes("/parents"),
     },
+    {
+      label: "Aanwezigheid",
+      icon: Calendar,
+      href: "/attendance",
+      active: pathname.includes("/attendance"),
+    },
+    {
+      label: "Facturen",
+      icon: Receipt,
+      href: "/invoices",
+      active: pathname.includes("/invoices"),
+    },
   ]
 
   return (
@@ -42,7 +54,7 @@ export default function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-64 sm:max-w-sm">
-          <div className="flex h-14 items-center px-4">
+          <div className="flex h-14 items-center px-4 bg-primary text-primary-foreground">
             <Link href="/" className="flex items-center font-semibold">
               <span className="text-xl">Qiddo Register</span>
             </Link>
@@ -53,8 +65,10 @@ export default function Header() {
                 key={route.href}
                 href={route.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                  route.active ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  route.active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-primary/10 hover:text-primary",
                 )}
               >
                 <route.icon className="h-4 w-4" />
@@ -66,7 +80,7 @@ export default function Header() {
       </Sheet>
       <div className="flex-1 md:hidden">
         <Link href="/" className="flex items-center font-semibold">
-          <span className="text-xl">Qiddo Register</span>
+          <span className="text-xl text-primary">Qiddo Register</span>
         </Link>
       </div>
     </header>

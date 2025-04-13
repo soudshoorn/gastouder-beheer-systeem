@@ -29,6 +29,7 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { TableLoader } from "@/components/ui/loading-spinner";
 
 export default function ChildrenPage() {
   const [children, setChildren] = useState<Child[]>([]);
@@ -42,7 +43,8 @@ export default function ChildrenPage() {
     const fetchChildren = async () => {
       try {
         const data = await childrenApi.getAll();
-        setChildren(data);
+        // Sorteer kinderen op ID in aflopende volgorde (nieuwste eerst)
+        setChildren(data.sort((a, b) => (b.id || 0) - (a.id || 0)));
       } catch (error) {
         console.error("Fout bij ophalen kinderen:", error);
         toast({
@@ -80,9 +82,9 @@ export default function ChildrenPage() {
   };
 
   // Filter kinderen op basis van zoekopdracht
-  const filteredChildren = children.filter((child) =>
-    child.naam.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredChildren = children.filter((child) => {
+    return child.naam.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   // Formateer datum voor weergave
   const formatDate = (dateString: string) => {
@@ -90,6 +92,26 @@ export default function ChildrenPage() {
       return format(new Date(dateString), "d MMMM yyyy", { locale: nl });
     } catch (error) {
       return dateString;
+    }
+  };
+
+  // Haal ouder naam op
+  const getParentName = (child: Child) => {
+    if (typeof child.parent === "object" && "naam" in child.parent) {
+      return child.parent.naam;
+    }
+    return "Onbekend";
+  };
+
+  // Vertaal gender code naar leesbare tekst
+  const getGenderText = (gender: string) => {
+    switch (gender) {
+      case "M":
+        return "Jongen";
+      case "F":
+        return "Meisje";
+      default:
+        return "Anders";
     }
   };
 
@@ -119,10 +141,12 @@ export default function ChildrenPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center">Laden...</div>
+        <TableLoader />
       ) : filteredChildren.length === 0 ? (
-        <div className="text-center py-10">
-          <p className="text-muted-foreground">Geen kinderen gevonden</p>
+        <div className="rounded-md border shadow-sm">
+          <div className="flex flex-col items-center justify-center py-10">
+            <p className="text-muted-foreground">Geen kinderen gevonden</p>
+          </div>
         </div>
       ) : (
         <div className="rounded-md border">
@@ -132,8 +156,9 @@ export default function ChildrenPage() {
                 <TableHead>Naam</TableHead>
                 <TableHead>Geboortedatum</TableHead>
                 <TableHead>Allergieën</TableHead>
-                <TableHead>Voorkeur eten</TableHead>
-                <TableHead>Contactpersoon</TableHead>
+                <TableHead>Dieetvoorkeuren</TableHead>
+                <TableHead>Ouder</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Acties</TableHead>
               </TableRow>
             </TableHeader>
@@ -142,9 +167,20 @@ export default function ChildrenPage() {
                 <TableRow key={child.id}>
                   <TableCell className="font-medium">{child.naam}</TableCell>
                   <TableCell>{formatDate(child.geboortedatum)}</TableCell>
-                  <TableCell>{child.allergieen || "-"}</TableCell>
-                  <TableCell>{child.voorkeurEten || "-"}</TableCell>
-                  <TableCell>{child.contactPersoon}</TableCell>
+                  <TableCell>{child.allergies || "-"}</TableCell>
+                  <TableCell>{child.dietaryPreferences || "-"}</TableCell>
+                  <TableCell>{getParentName(child)}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        child.active
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {child.active ? "Actief" : "Inactief"}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button

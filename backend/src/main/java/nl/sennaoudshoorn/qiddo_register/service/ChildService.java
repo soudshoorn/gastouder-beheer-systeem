@@ -1,53 +1,82 @@
 package nl.sennaoudshoorn.qiddo_register.service;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import nl.sennaoudshoorn.qiddo_register.model.Child;
+import nl.sennaoudshoorn.qiddo_register.model.Parent;
 import nl.sennaoudshoorn.qiddo_register.repository.ChildRepository;
+import nl.sennaoudshoorn.qiddo_register.repository.ParentRepository;
 
 @Service
 public class ChildService {
 
-    private final ChildRepository childRepository;
+    @Autowired
+    private ChildRepository childRepository;
 
-    public ChildService(ChildRepository childRepository) {
-        this.childRepository = childRepository;
-    }
+    @Autowired
+    private ParentRepository parentRepository;
 
-    public List<Child> findAll() {
+    public List<Child> getAllChildren() {
         return childRepository.findAll();
     }
 
-    public Child findById(Long id) {
-        return childRepository.findById(id).orElse(null);
+    public Optional<Child> getChildById(Long id) {
+        return childRepository.findById(id);
     }
 
-    public Child save(Child child) {
+    @Transactional
+    public Child createChild(Child child) {
+        // The Child entity extends Person, so when we save a Child,
+        // JPA will automatically create both the person and child records
         return childRepository.save(child);
     }
 
-    public void deleteById(Long id) {
-        childRepository.deleteById(id);
+    @Transactional
+    public Optional<Child> updateChild(Long id, Child child) {
+        if (!childRepository.existsById(id)) {
+            return Optional.empty();
+        }
+
+        // Create a new Child instance with the updated data
+        Child existingChild = childRepository.findById(id).orElse(null);
+        if (existingChild != null) {
+            existingChild.setNaam(child.getNaam());
+            existingChild.setGeboortedatum(child.getGeboortedatum());
+            existingChild.setGender(child.getGender());
+            existingChild.setAllergies(child.getAllergies());
+            existingChild.setDietaryPreferences(child.getDietaryPreferences());
+            existingChild.setNotes(child.getNotes());
+            existingChild.setActive(child.isActive());
+            existingChild.setParent(child.getParent());
+            return Optional.of(childRepository.save(existingChild));
+        }
+        return Optional.empty();
     }
 
-        public Child updateChild(Long id, Child updatedChild) {
-        Child existing = childRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Kind niet gevonden met id " + id));
+    @Transactional
+    public boolean deleteChild(Long id) {
+        if (!childRepository.existsById(id)) {
+            return false;
+        }
 
-        existing.setNaam(updatedChild.getNaam());
-        existing.setGeboortedatum(updatedChild.getGeboortedatum());
-        existing.setAllergieen(updatedChild.getAllergieen());
-        existing.setVoorkeurEten(updatedChild.getVoorkeurEten());
-        existing.setStartDatum(updatedChild.getStartDatum());
-        existing.setEindDatum(updatedChild.getEindDatum());
-        existing.setUrenPerWeek(updatedChild.getUrenPerWeek());
-        existing.setContactPersoon(updatedChild.getContactPersoon());
+        childRepository.deleteById(id);
+        return true;
+    }
 
-        return childRepository.save(existing);
+    public List<Child> getChildrenByParentId(Long parentId) {
+        return childRepository.findByParentId(parentId);
+    }
+
+    public List<Child> getActiveChildren() {
+        return childRepository.findByActiveTrue();
+    }
+
+    public List<Child> getInactiveChildren() {
+        return childRepository.findByActiveFalse();
     }
 }
