@@ -32,8 +32,9 @@ public class InvoicePdfService {
         document.add(new Paragraph("\nFactuurnummer: " + invoice.getId()));
         document.add(new Paragraph("Datum: " + invoice.getInvoiceDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
         document.add(new Paragraph("Klant: " + invoice.getParent().getNaam()));
-        document.add(new Paragraph("Telefoon: " + invoice.getParent().getTelefoonnummer()));
+        document.add(new Paragraph("Telefoon: " + invoice.getParent().getPhone()));
         document.add(new Paragraph("Email: " + invoice.getParent().getEmail()));
+        document.add(new Paragraph("Adres: " + invoice.getParent().getAddress()));
 
         // Add table for invoice items
         Table table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
@@ -46,7 +47,7 @@ public class InvoicePdfService {
         document.add(table);
 
         // Add total
-        document.add(new Paragraph("\nTotaalbedrag: € " + String.format("%.2f", invoice.getAmount()))
+        document.add(new Paragraph("\nTotaal: € " + String.format("%.2f", invoice.getAmount()))
                 .setTextAlignment(TextAlignment.RIGHT)
                 .setBold());
 

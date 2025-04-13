@@ -37,4 +37,29 @@ public class Parent extends Person {
     public String getRolOmschrijving() {
         return "Ouder";
     }
+
+    // Explicit getters and setters for compatibility
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

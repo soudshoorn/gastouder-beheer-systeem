@@ -48,8 +48,9 @@ public class ParentService {
         // Velden overschrijven
         existing.setNaam(updatedParent.getNaam());
         existing.setGeboortedatum(updatedParent.getGeboortedatum());
-        existing.setTelefoonnummer(updatedParent.getTelefoonnummer());
+        existing.setPhone(updatedParent.getPhone());
         existing.setEmail(updatedParent.getEmail());
+        existing.setAddress(updatedParent.getAddress());
 
         return parentRepository.save(existing);
     }
